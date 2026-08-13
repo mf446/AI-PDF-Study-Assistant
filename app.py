@@ -98,8 +98,14 @@ def home():
                 # Split PDF into chunks
                 # ----------------------------------------------
 
-                pdf_chunks = split_text(pdf_text)
-                print("TOTAL PDF CHUNKS:", len(pdf_chunks))
+                pdf_chunks = split_text(
+                    pdf_text
+                )
+
+                print(
+                    "TOTAL PDF CHUNKS:",
+                    len(pdf_chunks)
+                )
 
 
                 # ----------------------------------------------
@@ -157,10 +163,6 @@ def home():
                 )
 
 
-                # Default number of chunks
-                top_k = 5
-
-
                 # ==================================================
                 # SUMMARY
                 # ==================================================
@@ -176,9 +178,13 @@ def home():
                     all_summaries = []
 
 
-                    # Process PDF in batches
-                    batch_size = 10
+                    # Smaller batches = lower memory usage
+                    batch_size = 5
 
+
+                    # ----------------------------------------------
+                    # Summarize PDF in batches
+                    # ----------------------------------------------
 
                     for start in range(
                         0,
@@ -201,18 +207,24 @@ def home():
 
                         Requirements:
 
-                        - Identify the important concepts.
+                        - Identify the most important concepts.
                         - Explain important ideas clearly.
                         - Use headings where appropriate.
                         - Use bullet points.
                         - Include important definitions and facts.
+                        - Keep the summary concise.
                         - Do not add information that is not in the PDF.
                         """
 
 
+                        section_number = (
+                            start // batch_size + 1
+                        )
+
+
                         print(
                             f"Summarizing PDF section "
-                            f"{start // batch_size + 1}"
+                            f"{section_number}"
                         )
 
 
@@ -222,7 +234,10 @@ def home():
                         )
 
 
+                        # ------------------------------------------
                         # Check AI response
+                        # ------------------------------------------
+
                         if (
                             not answer
                             or answer.startswith("⚠️")
@@ -232,25 +247,33 @@ def home():
 
                             message = (
                                 f"The AI could not summarize "
-                                f"PDF section "
-                                f"{start // batch_size + 1}."
+                                f"PDF section {section_number}."
                             )
 
                             break
 
 
-                        # Save section summary
+                        # ------------------------------------------
+                        # Store section summary
+                        # ------------------------------------------
+
                         all_summaries.append(
                             answer
                         )
 
 
                     # ----------------------------------------------
-                    # Combine all section summaries
+                    # Create final summary
                     # ----------------------------------------------
 
                     if all_summaries:
 
+                        print(
+                            "CREATING FINAL SUMMARY"
+                        )
+
+
+                        # Combine smaller summaries
                         combined_summary = (
                             "\n\n".join(
                                 all_summaries
@@ -258,33 +281,21 @@ def home():
                         )
 
 
-                        # ------------------------------------------
-                        # Create final organized summary
-                        # ------------------------------------------
-
                         final_question = """
-                        Create one complete study summary
-                        from the section summaries below.
+                        Create a concise final study summary
+                        using ONLY the section summaries provided.
 
                         Requirements:
 
-                        - Organize the information logically.
-                        - Use clear headings.
+                        - Organize information using clear headings.
                         - Use bullet points.
-                        - Highlight important concepts.
-                        - Include important definitions and facts.
+                        - Include important definitions.
+                        - Include important facts and concepts.
                         - Remove repeated information.
+                        - Keep the final summary concise.
                         - Do not add information that is not
-                          contained in the summaries.
-
-                        Section summaries:
-
-                        """ + combined_summary
-
-
-                        print(
-                            "CREATING FINAL SUMMARY"
-                        )
+                          contained in the section summaries.
+                        """
 
 
                         final_answer = ask_ai(
@@ -293,7 +304,10 @@ def home():
                         )
 
 
+                        # ------------------------------------------
                         # Check final response
+                        # ------------------------------------------
+
                         if (
                             not final_answer
                             or final_answer.startswith("⚠️")
@@ -366,7 +380,7 @@ def home():
                     """
 
 
-                    # Retrieve more chunks for flashcards
+                    # Retrieve chunks for flashcards
                     top_k = 5
 
 
@@ -398,6 +412,10 @@ def home():
                         "FLASHCARD AI RESPONSE RECEIVED"
                     )
 
+
+                    # ------------------------------------------
+                    # Check AI response
+                    # ------------------------------------------
 
                     if (
                         not answer
@@ -489,6 +507,10 @@ def home():
                     )
 
 
+                    # ------------------------------------------
+                    # Check AI response
+                    # ------------------------------------------
+
                     if (
                         not answer
                         or answer.startswith("⚠️")
@@ -577,6 +599,10 @@ def home():
                     )
 
 
+                    # ------------------------------------------
+                    # Check AI response
+                    # ------------------------------------------
+
                     if (
                         not answer
                         or answer.startswith("⚠️")
@@ -639,6 +665,10 @@ def home():
                     # Keep track of previous questions
                     previous_questions = []
 
+
+                    # ----------------------------------------------
+                    # Generate MCQs batch by batch
+                    # ----------------------------------------------
 
                     for start in range(
                         0,
@@ -765,14 +795,20 @@ def home():
                             break
 
 
+                        # ------------------------------------------
                         # Save batch
+                        # ------------------------------------------
+
                         all_answers.append(
                             answer
                         )
 
 
+                        # ------------------------------------------
                         # Save generated questions
                         # for duplicate prevention
+                        # ------------------------------------------
+
                         previous_questions.append(
                             answer
                         )
