@@ -1,36 +1,28 @@
-from sentence_transformers import SentenceTransformer
+from sklearn.feature_extraction.text import TfidfVectorizer
 
-# Load the model only once
-model = SentenceTransformer("all-MiniLM-L6-v2")
+
+# Store the vectorizer so it can be reused
+vectorizer = TfidfVectorizer(
+    stop_words="english"
+)
 
 
 def create_embeddings(chunks):
     """
-    Convert a list of text chunks into embeddings.
-
-    Args:
-        chunks (list[str])
-
-    Returns:
-        list
+    Convert PDF chunks into lightweight TF-IDF vectors.
     """
-    embeddings = model.encode(
-        chunks,
-        convert_to_numpy=True,
-        show_progress_bar=True
-    )
+
+    embeddings = vectorizer.fit_transform(chunks)
 
     return embeddings
 
 
 def create_query_embedding(query):
     """
-    Convert a user's question into an embedding.
+    Convert the user's question into the same
+    TF-IDF representation used for the PDF chunks.
     """
 
-    embedding = model.encode(
-        query,
-        convert_to_numpy=True
-    )
+    embedding = vectorizer.transform([query])
 
     return embedding

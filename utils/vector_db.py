@@ -1,49 +1,52 @@
-import chromadb
+import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
 
-# Create a local database
-client = chromadb.Client()
 
-# Create (or reuse) a collection
-collection = client.get_or_create_collection(
-    name="pdf_chunks"
-)
+# Stored PDF chunks and their TF-IDF vectors
+stored_chunks = []
+stored_embeddings = None
 
 
 def store_chunks(chunks, embeddings):
     """
-    Store text chunks and their embeddings.
+    Store PDF chunks and their TF-IDF vectors.
     """
 
-    # Remove old PDF data
-    try:
-        collection.delete(
-            ids=[str(i) for i in range(collection.count())]
-        )
-    except Exception:
-        pass
+    global stored_chunks, stored_embeddings
 
-    collection.add(
-        ids=[str(i) for i in range(len(chunks))],
-        documents=chunks,
-        embeddings=embeddings.tolist()
-    )
+    stored_chunks = chunks
+    stored_embeddings = embeddings
 
 
 def search(query_embedding, top_k=10):
     """
-    Return the most relevant chunks.
+    Return the most relevant PDF chunks using
+    cosine similarity.
     """
 
-    results = collection.query(
-        query_embeddings=[query_embedding.tolist()],
-        n_results=top_k
-    )
+    if not stored_chunks or stored_embeddings is None:
+        return []
+
+    # Calculate similarity between the question
+    # and every PDF chunk
+    similarities = cosine_similarity(
+        query_embedding,
+        stored_embeddings
+    )[0]
+
+    # Get the indexes of the most relevant chunks
+    top_indexes = np.argsort(similarities)[::-1][:top_k]
+
+    results = [
+        stored_chunks[i]
+        for i in top_indexes
+    ]
 
     print("\n========== Retrieved Chunks ==========\n")
 
-    for i, chunk in enumerate(results["documents"][0], start=1):
+    for i, chunk in enumerate(results, start=1):
         print(f"Chunk {i}:")
-        print(chunk[:300])   # Print first 300 characters
+        print(chunk[:300])
         print("\n----------------------------\n")
 
-    return results["documents"][0]
+    return results
