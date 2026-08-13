@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AI PDF Study Assistant</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- ================= HEADER ================= -->
+
+    <div class="header">
+
+        <h1>📚 AI PDF Study Assistant</h1>
+
+        <p>
+            Upload your PDF and study smarter with AI.
+        </p>
+
+    </div>
+
+
+    <div class="main-layout">
+
+
+        <!-- ================= SIDEBAR ================= -->
+
+        <div class="sidebar">
+
+            <h2>📄 Upload PDF</h2>
+
+            <form
+                method="POST"
+                enctype="multipart/form-data"
+                id="upload-form"
+            >
+
+                <input
+                    type="file"
+                    name="pdf"
+                    accept=".pdf"
+                    required
+                >
+
+                <button type="submit">
+                    Upload PDF
+                </button>
+
+            </form>
+
+
+            {% if message %}
+
+            <div class="success">
+                ✅ {{ message }}
+            </div>
+
+            {% endif %}
+
+
+            <hr>
+
+
+            <!-- ================= STUDY TOOLS ================= -->
+
+            <h2>📚 Study Tools</h2>
+
+
+            <!-- Summary -->
+
+            <form method="POST" class="tool-form">
+
+                <input
+                    type="hidden"
+                    name="tool"
+                    value="summary"
+                >
+
+                <button
+                    type="submit"
+                    name="tool" 
+                    value="summary"
+                    class="tool-button"
+                >
+                    📄 Summary
+                </button>
+
+            </form>
+
+
+            <!-- MCQ -->
+
+            <form method="POST" class="tool-form">
+
+                <input
+                    type="hidden"
+                    name="tool"
+                    value="mcq"
+                >
+
+                <label>
+                    Number of Questions
+                </label>
+
+                <select name="mcq_number">
+
+                    <option value="5">
+                        5
+                    </option>
+
+                    <option value="10" selected>
+                        10
+                    </option>
+
+                    <option value="20">
+                        20
+                    </option>
+
+                    <option value="30">
+                        30
+                    </option>
+
+                    <option value="50">
+                        50
+                    </option>
+
+                </select>
+
+
+                <label>
+                    Difficulty
+                </label>
+
+                <select name="mcq_level">
+
+                    <option value="Easy">
+                        Easy
+                    </option>
+
+                    <option value="Medium" selected>
+                        Medium
+                    </option>
+
+                    <option value="Hard">
+                        Hard
+                    </option>
+
+                </select>
+
+
+                <button
+                    type="submit"
+                    class="tool-button"
+                >
+                    📝 Generate MCQs
+                </button>
+
+            </form>
+
+
+            <!-- Flashcards -->
+
+            <form method="POST" class="tool-form">
+
+                <input
+                    type="hidden"
+                    name="tool"
+                    value="flashcards"
+                >
+
+                <button
+                    type="submit"
+                    class="tool-button"
+                >
+                    🃏 Flashcards
+                </button>
+
+            </form>
+
+
+            <!-- Explain -->
+
+            <form method="POST" class="tool-form">
+
+                <input
+                    type="hidden"
+                    name="tool"
+                    value="explain"
+                >
+
+                <button
+                    type="submit"
+                    class="tool-button"
+                >
+                    💡 Explain Simply
+                </button>
+
+            </form>
+
+
+            <!-- Exam Notes -->
+
+            <form method="POST" class="tool-form">
+
+                <input
+                    type="hidden"
+                    name="tool"
+                    value="exam_notes"
+                >
+
+                <button
+                    type="submit"
+                    class="tool-button"
+                > 
+                    🎯 Exam Notes
+                </button>
+
+            </form>
+
+        </div>
+
+
+        <!-- ================= CHAT ================= -->
+
+        <div class="chat-section">
+
+            <h2>💬 Conversation</h2>
+
+
+            {% if chat_history %}
+
+                {% for chat in chat_history %}
+
+                <!-- USER -->
+
+                <div class="user-message">
+
+                    <h3>
+                        👤 You
+                    </h3>
+
+                    <p>
+                        {{ chat.question }}
+                    </p>
+                    <a href="{{ url_for('download_answer', index=loop.index0) }}">
+                          📥 Download
+                    </a>
+
+                </div>
+
+
+                <!-- AI -->
+
+                <div class="ai-message">
+
+                    <h3>
+                        🤖 AI Study Assistant
+                    </h3>
+
+
+                    <!--
+
+                    The JavaScript below checks whether
+                    this answer contains FLASHCARD data.
+
+                    If it does, it creates interactive cards.
+
+                    Otherwise, it displays the normal AI answer.
+
+                    -->
+
+                    <div
+                        class="answer-content"
+                        data-answer="{{ chat.answer | e }}"
+                    >
+
+                        {{ chat.answer_html | safe }}
+
+                    </div>
+                    <button
+    type="button"
+    class="copy-button"
+    onclick="copyAnswer(this)"
+>
+    📋 Copy
+</button>
+
+                </div>
+
+                {% endfor %}
+
+
+            {% else %}
+
+                <!-- WELCOME -->
+
+                <div class="welcome-card">
+
+                    <div class="welcome-icon">
+                        📚
+                    </div>
+
+                    <h2>
+                        Welcome! 👋
+                    </h2>
+
+                    <p>
+                        Upload a PDF and start studying.
+                    </p>
+
+                    <p>
+                        You can generate summaries,
+                        MCQs, flashcards, exam notes,
+                        or ask questions about your PDF.
+                    </p>
+
+                </div>
+
+            {% endif %}
+
+
+            <!-- ================= ASK AI ================= -->
+
+            <form
+                method="POST"
+                id="question-form"
+                class="question-form"
+            >
+
+                <input
+                    type="text"
+                    name="question"
+                    id="question"
+                    placeholder="Ask anything about your PDF..."
+                    required
+                >
+
+                <button type="submit">
+                    🚀 Ask AI
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ================= LOADING SCREEN ================= -->
+
+<div
+    id="loading-screen"
+    class="loading-screen hidden"
+>
+
+    <div class="loading-card">
+
+        <div class="spinner"></div>
+
+        <h2>
+            🤖 AI is thinking...
+        </h2>
+
+        <p>
+            Please wait while your answer is being generated.
+        </p>
+
+    </div>
+
+</div>
+
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+
+<a href="/clear-chat">Clear Chat</a>
+</body>
+
+</html>
