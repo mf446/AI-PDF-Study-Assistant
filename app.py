@@ -687,6 +687,13 @@ def home():
                                 previous_questions
                             )
                         )
+                         # Limit previous-question history
+                        # so the prompt does not grow too large
+                        if len(previous_text) > 6000:
+
+                            previous_text = previous_text[
+                                -6000:
+                            ]
 
 
                         question = f"""
