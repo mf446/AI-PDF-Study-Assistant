@@ -20,7 +20,7 @@ def ask_ai(question, context):
 
     try:
         response = client.chat.completions.create(
-            model="poolside/laguna-s-2.1:free",
+            model="openai/gpt-oss-20b:free",
             messages=[
                 {
                     "role": "system",
