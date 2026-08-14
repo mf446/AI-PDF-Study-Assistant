@@ -656,7 +656,7 @@ def home():
 
 
                     # Generate MCQs in batches
-                    batch_size = 10
+                    batch_size = 5
 
 
                     all_answers = []
@@ -742,7 +742,7 @@ def home():
 
                         relevant_chunks = search(
                             query_embedding,
-                            top_k=5
+                            top_k=3
                         )
 
 
