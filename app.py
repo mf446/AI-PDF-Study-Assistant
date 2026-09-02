@@ -761,8 +761,8 @@ def home():
                         # ------------------------------------------
                         # Ask AI
                         # ------------------------------------------
-                        print("MCQ: BEFORE AI REQUEST")
-                        print("Context length:", len(context))
+                        
+                        
 
                         answer = ask_ai(
                             question,
