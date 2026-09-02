@@ -20,7 +20,7 @@ def ask_ai(question, context):
 
     try:
         response = client.chat.completions.create(
-            model="openai/gpt-oss-20b:free",
+            model="nvidia/nemotron-3.5-lightning:free",
             messages=[
                 {
                     "role": "system",
